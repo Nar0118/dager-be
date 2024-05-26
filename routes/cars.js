@@ -18,8 +18,19 @@ const db = mongoose.connection;
 // Get all cars
 router.get("/", async (req, res) => {
   try {
-    const cars = await Car.find();
-    res.json(cars);
+    const { limit = 10, offset = 0, search = "" } = req.query;
+    const query = search ? { name: { $regex: search, $options: "i" } } : {};
+
+    const cars = await Car.find(query)
+      .skip(parseInt(offset))
+      .limit(parseInt(limit));
+
+    const total = await Car.countDocuments(query);
+
+    res.json({
+      data: cars,
+      total,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -55,7 +66,6 @@ router.post("/", auth, async (req, res) => {
 // Update a car
 router.put("/:id", auth, getCar, async (req, res) => {
   try {
-    console.log(1111);
     const updatedCar = await Car.findByIdAndUpdate(
       req.params.id,
       { $set: req.body },
