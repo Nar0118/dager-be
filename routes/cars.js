@@ -18,13 +18,13 @@ const db = mongoose.connection;
 // Get all cars
 router.get("/", async (req, res) => {
   try {
-    const { limit = 10, offset = 0, search = "" } = req.query;
-    const query = search ? { name: { $regex: search, $options: "i" } } : {};
+    const { limit = 10, offset = 0, search = "", name = "", year = "" } = req.query;
+    const query = search ? { name: { $regex: search, $options: "i" } } : name ? { name } : {};
 
     const cars = await Car.find(query)
       .skip(parseInt(offset))
-      .limit(parseInt(limit));
-
+      .limit(parseInt(limit))
+      .lean();
     const total = await Car.countDocuments(query);
 
     res.json({
@@ -39,7 +39,7 @@ router.get("/", async (req, res) => {
 // Get a car by ID
 router.get("/:id", async (req, res) => {
   try {
-    const car = await Car.findById(req.params.id);
+    const car = await Car.findById(req.params.id).lean();
     if (!car) {
       return res.status(404).json({ message: "Car not found" });
     }
@@ -65,12 +65,14 @@ router.post("/", auth, async (req, res) => {
 
 // Update a car
 router.put("/:id", auth, getCar, async (req, res) => {
+  console.log(22222);
   try {
     const updatedCar = await Car.findByIdAndUpdate(
       req.params.id,
       { $set: req.body },
       { new: true, runValidators: true }
     );
+    console.log(11111, updatedCar);
     if (!updatedCar) {
       return res.status(404).json({ message: "Car not found" });
     }
