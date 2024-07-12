@@ -26,7 +26,7 @@ const allowCrossDomain = function allowCrossDomain(req, res, next) {
     next();
   }
 };
-
+app.use(cors());
 app.use(
   allowCrossDomain
 );
@@ -55,17 +55,14 @@ app.post('/upload', (req, res) => {
       } else {
         // res.send(`File uploaded: ${req.file.path}`);
         res.json({ fileName: req.file.filename, filePath: `/uploads/${req.file.filename}` });
-      } 
-
+      }
     }
   });
 });
 
-app.use(cors());
 app.use(bodyParser.json());
 
-const mongoURI =
-  "mongodb+srv://narekxachatryan1998:eCHu2L4x7jlrKpL4@cluster0.7zacuse.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const mongoURI = "mongodb+srv://narekxachatryan1998:eCHu2L4x7jlrKpL4@cluster0.7zacuse.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 mongoose.connect(mongoURI, {
   useNewUrlParser: true,
