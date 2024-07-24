@@ -22,25 +22,107 @@ router.get("/", async (req, res) => {
       limit = 10,
       offset = 0,
       search = "",
-      name = "",
       year = "",
+      model = "",
+      engineNo = "",
+      engineVal = "",
     } = req.query;
-    const query = search
-      ? { name: { $regex: search, $options: "i" } }
-      : name
-      ? { name }
+    const regexSearch = search ? { $regex: search, $options: "i" } : null;
+
+    const query = regexSearch
+      ? {
+          $or: [
+            { name: regexSearch },
+            { model: regexSearch },
+            { engineNo: regexSearch },
+            { engineVal: regexSearch },
+            { year: regexSearch },
+            { "FRONTROTOR.marka": regexSearch },
+            { "FRONTBRAKE.marka": regexSearch },
+            { "REARROTOR.marka": regexSearch },
+            { "REARBRAKE.marka": regexSearch },
+            { "PARKINGSHOE.marka": regexSearch },
+          ],
+        }
       : {};
+
+    if (year) {
+      const [yearStart, yearEnd] = year
+        .split("~")
+        .map((num) => parseFloat(num));
+      if (!isNaN(yearStart) && !isNaN(yearEnd)) {
+        query.year = { $gte: yearStart, $lte: yearEnd };
+      } else if (!isNaN(parseFloat(year))) {
+        query.year = parseFloat(year);
+      } else {
+        return res.status(400).json({ message: "Invalid year format" });
+      }
+    }
+
+    if (model) {
+      query.model = model;
+    }
+
+    if (engineNo) {
+      query.engineNo = engineNo;
+    }
+
+    if (!!engineVal) {
+      query.engineVal = engineVal;
+    }
 
     const cars = await Car.find(query)
       .skip(parseInt(offset))
-      // .limit(parseInt(limit))
+      .limit(parseInt(limit))
       .lean();
     const total = await Car.countDocuments(query);
 
     res.json({
       data: cars,
+      count: cars?.length,
       total,
     });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get all distinct car names
+router.get("/names", async (_, res) => {
+  try {
+    const names = await Car.distinct("name");
+    res.json({ names });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get all distinct car models for a given car name
+router.get("/models", async (req, res) => {
+  try {
+    const { name } = req.query;
+    if (!name) {
+      return res.status(400).json({ message: "Car name is required" });
+    }
+    const models = await Car.distinct("model", { name: name });
+    res.json({ models });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get all distinct car years for a given car model
+router.get("/years", async (req, res) => {
+  try {
+    const { model } = req.query;
+    if (!model) {
+      return res.status(400).json({ message: "Car model is required" });
+    }
+    const years = await Car.distinct("year", { model: model });
+    const body = await Car.distinct("body", { model });
+    const engineVal = await Car.distinct("engineVal", { model });
+    const engineNo = await Car.distinct("engineNo", { model });
+    res.json({ years, body, engineVal, engineNo });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
