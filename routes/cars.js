@@ -26,6 +26,7 @@ router.get("/", async (req, res) => {
       model = "",
       engineNo = "",
       engineVal = "",
+      name = "",
     } = req.query;
     const regexSearch = search ? { $regex: search, $options: "i" } : null;
 
@@ -69,6 +70,10 @@ router.get("/", async (req, res) => {
 
     if (!!engineVal) {
       query.engineVal = engineVal;
+    }
+
+    if (!!name) {
+      query.name = name;
     }
 
     const cars = await Car.find(query)
