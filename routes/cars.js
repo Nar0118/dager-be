@@ -48,16 +48,18 @@ router.get("/", async (req, res) => {
       : {};
 
     if (year) {
-      const [yearStart, yearEnd] = year
-        .split("~")
-        .map((num) => parseFloat(num));
-      if (!isNaN(yearStart) && !isNaN(yearEnd)) {
-        query.year = { $gte: yearStart, $lte: yearEnd };
-      } else if (!isNaN(parseFloat(year))) {
-        query.year = parseFloat(year);
-      } else {
-        return res.status(400).json({ message: "Invalid year format" });
-      }
+      // const [yearStart, yearEnd] = year
+      //   .split("~")
+      //   .map((num) => parseFloat(num));
+      // if (!isNaN(yearStart) && !isNaN(yearEnd)) {
+      //   query.year = { $gte: yearStart, $lte: yearEnd };
+      // } else if (!isNaN(parseFloat(year))) {
+      //   query.year = parseFloat(year);
+      // } else {
+      //   return res.status(400).json({ message: "Invalid year format" });
+      // }
+      query.year = year;
+
     }
 
     if (model) {
