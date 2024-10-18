@@ -139,7 +139,7 @@ app.post("/contact", async (req, res) => {
     </html>`;
 
   const mailOptions = {
-    to: "khachatryannarek42@gmail.com",
+    to: "office.dagergermany@gmail.com",
     from: email,
     subject: "You've received a message from Dager",
     text: "Custom Email Template",
@@ -154,7 +154,7 @@ app.post("/contact", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`http://www.localhost:${PORT}`);
 });
